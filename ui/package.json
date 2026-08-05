@@ -1,0 +1,52 @@
+{
+  "name": "rtsp-streaming-service",
+  "version": "0.4.2",
+  "description": "RTSP 推拉流服务 - 桌面管理端",
+  "main": "main.js",
+  "author": "Edison",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.team.rtspstreaming",
+    "productName": "RTSP Streaming Service",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../engine/bin/rtsp-engine.exe",
+        "to": "engine/rtsp-engine.exe"
+      },
+      {
+        "from": "../engine/bin/ffmpeg.exe",
+        "to": "engine/ffmpeg.exe"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  }
+}
