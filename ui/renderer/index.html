@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:*; img-src 'self' data: blob: http://127.0.0.1:*; media-src 'self' blob:; style-src 'self' 'unsafe-inline'" />
+  <title>RTSP Streaming Service</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">▶</span>
+      <h1>RTSP Streaming Service</h1>
+    </div>
+    <div class="engine-status">
+      <span id="engineLight" class="light off"></span>
+      <span id="engineText">引擎未连接</span>
+      <button id="btnRestart" class="btn small">重启引擎</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 左侧竖排导航（SVG 图标） -->
+    <nav class="sidenav">
+      <button type="button" class="nav-btn active" data-page="push">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5m0 0l-5 5m5-5l5 5"/><path d="M4 21h16"/></svg>
+        <span class="nav-txt">推流</span>
+      </button>
+      <button type="button" class="nav-btn" data-page="pull">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m0 0l-5-5m5 5l5-5"/><path d="M4 3h16"/></svg>
+        <span class="nav-txt">拉流</span>
+      </button>
+      <button type="button" class="nav-btn" data-page="services">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><circle cx="7" cy="7.5" r="1"/><circle cx="7" cy="16.5" r="1"/></svg>
+        <span class="nav-txt">服务</span>
+      </button>
+      <button type="button" class="nav-btn" data-page="settings">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="nav-txt">设置</span>
+      </button>
+    </nav>
+
+    <!-- 推流页：左侧配置，右侧推流服务列表 -->
+    <section class="page" id="page-push">
+      <div class="page-head">
+        <h2>推流</h2>
+        <span class="page-desc">将文件 / 摄像头 / RTSP 源推送到内置或外部 RTSP 服务</span>
+      </div>
+      <div class="two-col">
+        <div class="col-left">
+          <form id="createForm" class="form-card">
+            <label>流名称
+              <input type="text" id="fName" placeholder="如: 车间摄像头1" />
+            </label>
+            <label>输入源类型
+              <select id="fSourceType">
+                <option value="file">视频文件</option>
+                <option value="camera">USB 摄像头</option>
+                <option value="rtsp">RTSP 拉流</option>
+              </select>
+            </label>
+            <!-- 文件源参数 -->
+            <div class="src-args" id="argsFile">
+              <label>文件路径
+                <div class="path-row">
+                  <input type="text" id="fFilePath" placeholder="C:\videos\demo.mp4" />
+                  <button type="button" id="btnBrowseFile" class="btn small">浏览…</button>
+                </div>
+              </label>
+              <label class="chk"><input type="checkbox" id="fLoop" checked /> 循环播放</label>
+            </div>
+            <!-- 摄像头源参数 -->
+            <div class="src-args hidden" id="argsCamera">
+              <label>设备
+                <select id="fDevice">
+                  <option value="">点击下方按钮检测设备…</option>
+                </select>
+              </label>
+              <button type="button" id="btnScanCameras" class="btn small" style="margin:6px 0 0 0;width:auto">🔄 检测摄像头</button>
+              <div class="row2">
+                <label>宽 <input type="number" id="fWidth" placeholder="1280" /></label>
+                <label>高 <input type="number" id="fHeight" placeholder="720" /></label>
+                <label>帧率 <input type="number" id="fFps" placeholder="30" /></label>
+              </div>
+            </div>
+            <!-- RTSP 源参数 -->
+            <div class="src-args hidden" id="argsRTSP">
+              <label>RTSP 地址
+                <input type="text" id="fUrl" placeholder="rtsp://user:pass@192.168.1.64:554/Streaming/Channels/101" />
+              </label>
+            </div>
+            <label>输出目标
+              <select id="fTargetType">
+                <option value="local">内置 RTSP 服务</option>
+                <option value="remote">外部 RTSP 服务器</option>
+              </select>
+            </label>
+            <div id="argsTargetLocal">
+              <label>流路径
+                <input type="text" id="fPath" placeholder="live/cam1" value="live/cam1" />
+              </label>
+            </div>
+            <div class="hidden" id="argsTargetRemote">
+              <label>外部服务器 URL
+                <input type="text" id="fTargetUrl" placeholder="rtsp://user:pass@host:554/live/x" />
+              </label>
+            </div>
+            <button type="submit" class="btn primary">创建流</button>
+          </form>
+        </div>
+        <div class="col-right">
+          <div class="sub-head">推流服务列表 <span id="streamCount" class="badge">0</span></div>
+          <table class="stream-table">
+            <thead>
+              <tr>
+                <th>名称</th><th>源</th><th>目标</th><th>状态</th><th>RTSP 地址</th><th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="streamBody">
+              <tr class="empty"><td colspan="6">暂无推流，左侧创建</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 拉流页：左侧配置，右侧预览区 -->
+    <section class="page" id="page-pull">
+      <div class="page-head">
+        <h2>拉流</h2>
+        <span class="page-desc">从外部 RTSP 源拉取，转发到本机内置服务（级联，零转码），右侧实时预览</span>
+      </div>
+      <div class="two-col">
+        <div class="col-left">
+          <form id="pullForm" class="form-card">
+            <label>流名称
+              <input type="text" id="pName" placeholder="如: 外网摄像机A" />
+            </label>
+            <label>外部 RTSP 地址
+              <input type="text" id="pUrl" placeholder="rtsp://user:pass@192.168.1.64:554/Streaming/Channels/101" />
+            </label>
+            <div class="tip">创建后自动启动并显示在右侧预览区（本机流路径自动分配）</div>
+            <button type="submit" class="btn primary">创建拉流</button>
+          </form>
+        </div>
+        <div class="col-right">
+          <div class="sub-head">拉流预览 <span id="pullPreviewCount" class="badge">0</span></div>
+          <div id="pullPreviewGrid" class="preview-grid">
+            <div class="grid-empty">暂无拉流，左侧配置地址后点击「创建拉流」</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 服务页：内置 RTSP 服务 + 第三方推流显示 -->
+    <section class="page" id="page-services">
+      <div class="page-head">
+        <h2>服务</h2>
+        <span class="page-desc">内置 RTSP 服务：供第三方推流到本机并统一显示</span>
+      </div>
+      <div class="svc-cards">
+        <div class="svc-card"><span class="svc-label">RTSP 服务地址</span><code id="svcRtsp">—</code></div>
+        <div class="svc-card"><span class="svc-label">API 地址</span><code id="svcHttp">—</code></div>
+        <div class="svc-card"><span class="svc-label">第三方推流示例</span><code id="svcPushCmd">—</code></div>
+      </div>
+      <div class="sub-head">第三方推流列表 <span id="extCount" class="badge">0</span></div>
+      <div class="tip">第三方使用任意支持 RTSP 推流的软件，推送到本机即可在此显示，例如：</div>
+      <div class="tip"><code id="extPushExample">ffmpeg -re -i 视频源 -c:v copy -f rtsp -rtsp_transport tcp rtsp://127.0.0.1:8554/live/xxx</code></div>
+      <table class="stream-table">
+        <thead>
+          <tr><th>路径</th><th>RTSP 地址</th><th>客户端数</th><th>操作</th></tr>
+        </thead>
+        <tbody id="extBody">
+          <tr class="empty"><td colspan="4">暂无第三方推流</td></tr>
+        </tbody>
+      </table>
+      <div class="sub-head">推流预览</div>
+      <div id="extPreviewGrid" class="preview-grid">
+        <div class="grid-empty">点击上方列表的「预览」按钮显示画面</div>
+      </div>
+    </section>
+
+    <!-- 设置页 -->
+    <section class="page hidden" id="page-settings">
+      <div class="page-head">
+        <h2>设置</h2>
+        <span class="page-desc">软件已按默认参数自动配置，以下为高级设置，通常无需修改；FFmpeg 与日志级别由软件自动管理</span>
+      </div>
+      <form id="settingsForm" class="form-card">
+        <div id="settingsLoadNote" class="settings-note hidden"></div>
+        <label>HTTP 监听 <input type="text" id="sHttp" placeholder="127.0.0.1:18080" /></label>
+        <label>RTSP 监听 <input type="text" id="sRtsp" placeholder=":8554" /></label>
+        <label>RTSP 拉流用户名 <input type="text" id="sUser" placeholder="（空=不鉴权）" /></label>
+        <label>RTSP 拉流密码 <input type="password" id="sPass" placeholder="（空=不鉴权）" /></label>
+        <div class="settings-note">修改后需重启引擎生效</div>
+        <div class="settings-actions">
+          <button type="button" id="btnResetSettings" class="btn">恢复默认</button>
+          <button type="submit" class="btn primary">保存设置</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="logbar">
+    <div class="loghead">
+      <span>引擎日志</span>
+      <div class="log-actions">
+        <label class="chk-log"><input type="checkbox" id="chkAutoScroll" checked /> 自动滚动</label>
+        <button type="button" id="btnCopyLog" class="btn tiny">📋 复制</button>
+        <button type="button" id="btnClearLog" class="btn tiny">清空</button>
+      </div>
+    </div>
+    <pre id="logArea"></pre>
+  </footer>
+
+  <!-- WebRTC 预览模态 -->
+  <div id="previewModal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span id="previewTitle">预览</span>
+        <button id="btnClosePreview" class="btn tiny">✕ 关闭</button>
+      </div>
+      <video id="previewVideo" autoplay muted playsinline></video>
+      <div id="previewStatus" class="preview-status">连接中...</div>
+    </div>
+  </div>
+
+  <!-- 快照查看模态 -->
+  <div id="snapModal" class="modal hidden">
+    <div class="modal-box snap-box">
+      <div class="modal-head">
+        <span id="snapTitle">快照</span>
+        <button id="btnCloseSnap" class="btn tiny">✕ 关闭</button>
+      </div>
+      <img id="snapImage" alt="快照" />
+      <div id="snapStatus" class="preview-status"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
