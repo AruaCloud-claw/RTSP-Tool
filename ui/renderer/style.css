@@ -1,0 +1,197 @@
+/* RTSP Streaming Service UI */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: #1e1f24;
+  color: #d8d9de;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶栏 */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: #26272e; border-bottom: 1px solid #33343c;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.logo { color: #4da3ff; font-size: 20px; }
+.brand h1 { font-size: 16px; font-weight: 600; }
+.engine-status { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.light { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.light.on { background: #3ddc84; box-shadow: 0 0 6px #3ddc84; }
+.light.off { background: #f0433e; box-shadow: 0 0 6px #f0433e; }
+
+/* 按钮 */
+.btn {
+  background: #3a3c46; color: #d8d9de; border: 1px solid #4a4c58;
+  padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 13px;
+}
+.btn:hover { background: #454752; }
+.btn.primary { background: #2f6fce; border-color: #2f6fce; }
+.btn.primary:hover { background: #3a7ee0; }
+.btn.small { padding: 3px 10px; font-size: 12px; }
+.btn.tiny { padding: 2px 8px; font-size: 11px; }
+.btn.danger { background: #8a2f2b; border-color: #8a2f2b; }
+
+/* 布局 */
+.layout {
+  flex: 1; display: flex; gap: 14px; padding: 14px; min-height: 0; overflow: hidden;
+}
+
+/* 左侧竖排导航 */
+.sidenav {
+  width: 76px; flex-shrink: 0; background: #202127; border: 1px solid #33343c;
+  border-radius: 8px; padding: 8px 0; display: flex; flex-direction: column; gap: 4px;
+}
+.nav-btn {
+  background: transparent; border: none; color: #9aa0ad; cursor: pointer;
+  padding: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 12px; border-left: 3px solid transparent; transition: all .15s;
+}
+.nav-btn:hover { background: #2a2c35; color: #d8d9de; }
+.nav-btn.active {
+  background: #26272e; color: #4da3ff; border-left-color: #4da3ff;
+}
+.nav-ico { width: 20px; height: 20px; }
+.nav-txt { font-size: 12px; }
+
+/* 页面卡片 */
+.page {
+  flex: 1; min-width: 0; background: #26272e; border: 1px solid #33343c;
+  border-radius: 8px; padding: 16px 18px; overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+.page-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+.page-head h2 { font-size: 15px; color: #d8d9de; }
+.page-desc { font-size: 12px; color: #7a8090; }
+.form-card { max-width: 560px; }
+.tip { font-size: 12px; color: #7a8090; margin-top: 10px; }
+.tip code, .svc-card code { color: #4da3ff; font-family: Consolas, monospace; }
+
+/* 双栏布局 */
+.two-col { display: flex; gap: 18px; align-items: flex-start; }
+.col-left { width: 380px; flex-shrink: 0; }
+.col-right { flex: 1; min-width: 0; }
+.sub-head {
+  font-size: 14px; color: #d8d9de; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* 预览网格（多路视频） */
+.preview-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px; align-content: start;
+}
+.pv-cell { background: #1e1f24; border: 1px solid #33343c; border-radius: 8px; overflow: hidden; }
+.pv-cell video { width: 100%; background: #000; aspect-ratio: 16/9; display: block; }
+.pv-bar { display: flex; align-items: center; gap: 8px; padding: 6px 10px; font-size: 12px; }
+.pv-title { color: #d8d9de; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.pv-status { color: #7a8090; }
+.pv-status.pv-live { color: #3ddc84; }
+.grid-empty { grid-column: 1 / -1; color: #666; text-align: center; padding: 30px 0; font-size: 13px; }
+
+/* 服务地址卡片 */
+.svc-cards { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.svc-card {
+  background: #1e1f24; border: 1px solid #33343c; border-radius: 8px;
+  padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; min-width: 200px;
+}
+.svc-label { font-size: 11px; color: #7a8090; }
+.svc-card code { font-size: 13px; }
+
+/* 滚动条美化（全局统一） */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3a3c46; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #4a4c58; }
+::-webkit-scrollbar-corner { background: transparent; }
+/* 页面区域：纤细滚动条 */
+.page { scrollbar-width: thin; scrollbar-color: #3f4250 transparent; }
+.page::-webkit-scrollbar { width: 6px; }
+.page::-webkit-scrollbar-thumb { background: #3f4250; border-radius: 3px; }
+.page::-webkit-scrollbar-thumb:hover { background: #52566a; }
+.page { padding-right: 20px; } /* 内容与滚动条留白 */
+
+/* 表单 */
+form label { display: block; font-size: 12px; color: #9aa0ad; margin: 8px 0 4px; }
+form input, form select {
+  width: 100%; background: #1e1f24; border: 1px solid #3a3c46; color: #d8d9de;
+  padding: 7px 9px; border-radius: 4px; margin-top: 3px; font-size: 13px;
+}
+form input:focus, form select:focus { outline: none; border-color: #2f6fce; }
+.chk { display: flex; align-items: center; gap: 6px; }
+.chk input { width: auto; margin: 0; }
+.path-row { display: flex; gap: 6px; }
+.path-row input { flex: 1; }
+.path-row .btn { width: auto; margin: 3px 0 0 0; padding: 7px 12px; white-space: nowrap; }
+.row2 { display: flex; gap: 8px; }
+.row2 label { flex: 1; }
+form .btn { margin-top: 14px; width: 100%; }
+.hidden { display: none; }
+
+/* 表格 */
+.stream-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.stream-table th {
+  text-align: left; padding: 8px 10px; color: #9aa0ad; font-weight: 500;
+  border-bottom: 1px solid #33343c; position: sticky; top: 0; background: #26272e;
+}
+.stream-table td { padding: 8px 10px; border-bottom: 1px solid #2c2d34; }
+.stream-table tr:hover td { background: #2c2e37; }
+.badge {
+  background: #2f6fce; color: #fff; border-radius: 10px; padding: 1px 8px; font-size: 12px;
+}
+.status { padding: 2px 10px; border-radius: 10px; font-size: 12px; }
+.status.running { background: #1d3d2c; color: #3ddc84; }
+.status.stopped { background: #33343c; color: #9aa0ad; }
+.status.starting { background: #3d3a1d; color: #e8c84d; }
+.status.error { background: #3d1d1d; color: #f0433e; }
+.empty td { text-align: center; color: #666; padding: 30px; }
+.url-cell { font-family: Consolas, monospace; font-size: 12px; color: #4da3ff; }
+.row-actions { display: flex; gap: 6px; }
+
+/* 日志 */
+.logbar {
+  height: 180px; border-top: 1px solid #33343c; background: #1a1b1f;
+  display: flex; flex-direction: column;
+}
+.loghead {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 14px; font-size: 12px; color: #9aa0ad; border-bottom: 1px solid #2c2d34;
+}
+.log-actions { display: flex; align-items: center; gap: 8px; }
+.chk-log { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #9aa0ad; cursor: pointer; }
+.chk-log input { accent-color: #4da3ff; }
+#logArea {
+  flex: 1; overflow-y: auto; padding: 8px 14px; font-family: Consolas, monospace;
+  font-size: 12px; line-height: 1.5; white-space: pre-wrap; color: #8f95a3;
+}
+
+/* WebRTC 预览模态 */
+.modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+}
+.modal-box {
+  background: #1e1f24; border: 1px solid #33343c; border-radius: 10px;
+  width: 720px; max-width: 90vw; padding: 14px;
+}
+.modal-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px; font-size: 14px; color: #d8d9de;
+}
+#previewVideo {
+  width: 100%; background: #000; border-radius: 6px; aspect-ratio: 16/9;
+}
+.preview-status {
+  margin-top: 8px; font-size: 12px; color: #9aa0ad; text-align: center;
+}
+.preview-status.live { color: #3ddc84; }
+
+/* 快照/设置模态 */
+.snap-box { width: 560px; }
+#snapImage { width: 100%; border-radius: 6px; background: #000; }
+.settings-box { width: 480px; }
+.settings-note { font-size: 12px; color: #e8c84d; margin: 4px 0 10px; }
+.settings-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+.settings-actions .btn { flex: 0 0 auto; }
